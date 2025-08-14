@@ -75,19 +75,34 @@ wheels = [
 name = "tennis-scoreboard"
 version = "0.1.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "waitress" },
+]
 
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
     { name = "ruff" },
+    { name = "types-waitress" },
 ]
 
 [package.metadata]
+requires-dist = [{ name = "waitress", specifier = ">=3.0.2" }]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.17.1" },
     { name = "ruff", specifier = ">=0.12.8" },
+    { name = "types-waitress", specifier = ">=3.0.1.20250801" },
+]
+
+[[package]]
+name = "types-waitress"
+version = "3.0.1.20250801"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/39/d4/ec386bf1166249c59fd6fc6bb83b174da33540a272d4b45b6ecac3978a7c/types_waitress-3.0.1.20250801.tar.gz", hash = "sha256:f919fda09e44798771d8ac54bb8573c165f1a1bc1aa9bfbf4296603db59455be", size = 14215, upload-time = "2025-08-01T03:48:11.975Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/14/0bd9a8de7c618de4434b3954eedf2ba11a962d5b1ab2311d7c10b8402bdc/types_waitress-3.0.1.20250801-py3-none-any.whl", hash = "sha256:17830a3bf096a967368cfc4dfaf19e2ab6cde8ac880747ebb47c01ca85704d9f", size = 17477, upload-time = "2025-08-01T03:48:10.869Z" },
 ]
 
 [[package]]
@@ -97,4 +112,13 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/98/5a/da40306b885cc8c09109dc2e1abd358d5684b1425678151cdaed4731c822/typing_extensions-4.14.1.tar.gz", hash = "sha256:38b39f4aeeab64884ce9f74c94263ef78f3c22467c8724005483154c26648d36", size = 107673, upload-time = "2025-07-04T13:28:34.16Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b5/00/d631e67a838026495268c2f6884f3711a15a9a2a96cd244fdaea53b823fb/typing_extensions-4.14.1-py3-none-any.whl", hash = "sha256:d1e1e3b58374dc93031d6eda2420a48ea44a36c2b4766a4fdeb3710755731d76", size = 43906, upload-time = "2025-07-04T13:28:32.743Z" },
+]
+
+[[package]]
+name = "waitress"
+version = "3.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/cb/04ddb054f45faa306a230769e868c28b8065ea196891f09004ebace5b184/waitress-3.0.2.tar.gz", hash = "sha256:682aaaf2af0c44ada4abfb70ded36393f0e307f4ab9456a215ce0020baefc31f", size = 179901, upload-time = "2024-11-16T20:02:35.195Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8d/57/a27182528c90ef38d82b636a11f606b0cbb0e17588ed205435f8affe3368/waitress-3.0.2-py3-none-any.whl", hash = "sha256:c56d67fd6e87c2ee598b76abdd4e96cfad1f24cacdea5078d382b1f9d7b5ed2e", size = 56232, upload-time = "2024-11-16T20:02:33.858Z" },
 ]

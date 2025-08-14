@@ -4,12 +4,15 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "waitress>=3.0.2",
+]
 
 [dependency-groups]
 dev = [
     "mypy>=1.17.1",
     "ruff>=0.12.8",
+    "types-waitress>=3.0.1.20250801",
 ]
 
 [tool.mypy]
