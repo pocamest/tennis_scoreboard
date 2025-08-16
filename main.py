@@ -22,7 +22,7 @@ class App:
             status = '404 Not Found'
             headers = [('Content-Type', 'text/html; charset=utf-8')]
             start_response(status, headers)
-            return [b'<h1>Not Found</h1>']
+            return [b'<h1>404 Not Found</h1>']
 
         parsed_query_params = parse_qs(environ.get('QUERY_STRING', ''))
         query_params = self._unpack_data(parsed_query_params)
@@ -45,7 +45,7 @@ class App:
             status = '500 Internal Server Error'
             headers = [('Content-type', 'text/html; charset=utf-8')]
             start_response(status, headers)
-            return [b'Internal Server Error']
+            return [b'<h1>500 Internal Server Error</h1>']
 
     def _unpack_data(self, raw_data: dict[str, list[str]]) -> dict[str, str]:
         data = {}
