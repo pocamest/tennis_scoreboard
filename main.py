@@ -4,7 +4,7 @@ from wsgiref.types import StartResponse, WSGIEnvironment
 
 from waitress import serve
 
-from app import Router
+from app import PlayerController, Router, register_routes
 
 
 class App:
@@ -59,6 +59,8 @@ class App:
 
 
 router = Router()
+player_controller = PlayerController()
+register_routes(router=router, player_controller=player_controller)
 application = App(router=router)
 
 
