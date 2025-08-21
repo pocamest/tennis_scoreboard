@@ -12,14 +12,8 @@
 и сфокусированными.
 """
 
-from sqlalchemy.orm import DeclarativeBase
-
+from .base import Base
 from .match import Match
 from .player import Player
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-__all__ = ['Player', 'Match']
+__all__ = ['Base', 'Player', 'Match']
