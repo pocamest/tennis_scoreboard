@@ -8,7 +8,7 @@ from app import PlayerController, Router, register_routes
 
 
 class App:
-    def __init__(self, router: Router) -> None:
+    def __init__(self, router: Router):
         self._router = router
 
     def __call__(
