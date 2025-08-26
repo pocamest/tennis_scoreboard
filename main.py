@@ -3,6 +3,7 @@ from urllib.parse import parse_qs
 from wsgiref.types import StartResponse, WSGIEnvironment
 
 from waitress import serve
+from whitenoise import WhiteNoise
 
 from app import PlayerController, Router, register_routes
 
@@ -62,7 +63,8 @@ router = Router()
 player_controller = PlayerController()
 register_routes(router=router, player_controller=player_controller)
 application = App(router=router)
+application_with_static = WhiteNoise(application=application, root='app/static/')
 
 
 if __name__ == '__main__':
-    serve(application, host='localhost', port=8080)
+    serve(application_with_static, host='localhost', port=8080)
