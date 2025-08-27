@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from waitress import serve
 from whitenoise import WhiteNoise
 
-from app import MainController, Router, register_routes
+from app import MainController, MatchController, Router, register_routes
 from app.settings import settings
 
 
@@ -64,7 +64,10 @@ class App:
 router = Router()
 jinja_env = Environment(loader=FileSystemLoader(settings.template_dir))
 main_controller = MainController(jinja_env=jinja_env)
-register_routes(router=router, main_controller=main_controller)
+match_controller = MatchController(jinja_env=jinja_env)
+register_routes(
+    router=router, main_controller=main_controller, match_controller=match_controller
+)
 application = App(router=router)
 application_with_static = WhiteNoise(
     application=application, root=settings.static_dir, prefix=settings.static_url

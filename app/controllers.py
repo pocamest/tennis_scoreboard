@@ -12,3 +12,16 @@ class MainController:
         status = '200 OK'
         headers = [('Content-Type', 'text/html; charset=utf-8')]
         return status, headers, html_body
+
+
+class MatchController:
+    def __init__(self, jinja_env: Environment):
+        self._jinja = jinja_env
+
+    def show_new_match_page(self) -> tuple[str, list[tuple[str, str]], str]:
+        template = self._jinja.get_template('new-match.html')
+        html_body = template.render()
+
+        status = '200 OK'
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        return status, headers, html_body
