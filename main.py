@@ -72,4 +72,4 @@ application_with_static = WhiteNoise(
 
 
 if __name__ == '__main__':
-    serve(application_with_static, host='localhost', port=8080)
+    serve(application_with_static, host=settings.app_host, port=settings.app_port)

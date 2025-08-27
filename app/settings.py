@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     db_url: str
     db_echo: bool = False
 
+    app_host: str = '127.0.0.1'
+    app_port: int = 8080
+
     base_dir: Path = BASE_DIR
     template_dir: Path = base_dir / 'app' / 'templates'
     static_dir: Path = base_dir / 'app' / 'static'
