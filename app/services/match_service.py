@@ -9,5 +9,5 @@ class MatchService:
 
     def get_all_matches(self) -> list[Match]:
         with self._db.get_session() as session:
-            match_repository = MatchRepository(session)
-            return match_repository.find_all_matches_with_players()
+            match_repo = MatchRepository(session)
+            return match_repo.find_all_matches_with_players()
