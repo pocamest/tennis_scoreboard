@@ -3,14 +3,14 @@ from app.router import Router
 
 
 def register_routes(
-    router: Router, main_controller: MainController, match_controller: MatchController
+    router: Router, main_ctrl: MainController, match_ctrl: MatchController
 ) -> None:
-    router.add_route(method='GET', path='/', handler=main_controller.show_index_page)
+    router.add_route(method='GET', path='/', handler=main_ctrl.show_index_page)
     router.add_route(
-        method='GET', path='/new-match', handler=match_controller.show_new_match_page
+        method='GET', path='/new-match', handler=match_ctrl.show_new_match_page
     )
     router.add_route(
         method='POST',
         path='/new-match',
-        handler=match_controller.handle_new_match_creation,
+        handler=match_ctrl.handle_new_match_creation,
     )

@@ -74,10 +74,10 @@ jinja_env = Environment(loader=FileSystemLoader(settings.template_dir))
 ongoing_match_store = OngoingMatchStore()
 db = Database(db_url=settings.db_url, echo=settings.db_echo)
 match_srv = MatchService(db=db, ongoing_match_store=ongoing_match_store)
-main_controller = MainController(jinja_env=jinja_env)
-match_controller = MatchController(jinja_env=jinja_env, match_srv=match_srv)
+main_ctrl = MainController(jinja_env=jinja_env)
+match_ctrl = MatchController(jinja_env=jinja_env, match_srv=match_srv)
 register_routes(
-    router=router, main_controller=main_controller, match_controller=match_controller
+    router=router, main_ctrl=main_ctrl, match_ctrl=match_ctrl
 )
 application = App(router=router)
 application_with_static = WhiteNoise(
