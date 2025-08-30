@@ -6,7 +6,15 @@ from jinja2 import Environment, FileSystemLoader
 from waitress import serve
 from whitenoise import WhiteNoise
 
-from app import MainController, MatchController, Router, register_routes
+from app import (
+    Database,
+    MainController,
+    MatchController,
+    MatchService,
+    OngoingMatchStore,
+    Router,
+    register_routes,
+)
 from app.settings import settings
 
 
@@ -63,8 +71,11 @@ class App:
 
 router = Router()
 jinja_env = Environment(loader=FileSystemLoader(settings.template_dir))
+ongoing_match_store = OngoingMatchStore()
+db = Database(db_url=settings.db_url, echo=settings.db_echo)
+match_srv = MatchService(db=db, ongoing_match_store=ongoing_match_store)
 main_controller = MainController(jinja_env=jinja_env)
-match_controller = MatchController(jinja_env=jinja_env)
+match_controller = MatchController(jinja_env=jinja_env, match_srv=match_srv)
 register_routes(
     router=router, main_controller=main_controller, match_controller=match_controller
 )

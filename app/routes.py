@@ -9,3 +9,8 @@ def register_routes(
     router.add_route(
         method='GET', path='/new-match', handler=match_controller.show_new_match_page
     )
+    router.add_route(
+        method='POST',
+        path='/new-match',
+        handler=match_controller.handle_new_match_creation,
+    )

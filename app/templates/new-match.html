@@ -34,11 +34,15 @@
             <div class="new-match-image"></div>
             <div class="form-container center">
                 <form method="post" action="/new-match">
-                    <p style="color: red;">Sample error message</p>
-                    <label class="label-player" for="playerOne">Player one</label>
-                    <input class="input-player" placeholder="Name" type="text" required title="Enter a name">
-                    <label class="label-player" for="playerTwo">Player two</label>
-                    <input class="input-player" placeholder="Name" type="text" required title="Enter a name">
+
+                    {% if error_message %}
+                        <p style="color: red;">{{ error_message }}</p>
+                    {% endif %}
+
+                    <label class="label-player" for="player1_name">Player one</label>
+                    <input class="input-player" placeholder="Name" type="text" required title="Enter a name" id="player1_name" name="player1_name" value="{{ player1_name or '' }}">
+                    <label class="label-player" for="player2_name">Player two</label>
+                    <input class="input-player" placeholder="Name" type="text" required title="Enter a name" id="player2_name" name="player2_name" value="{{ player2_name or '' }}">
                     <input class="form-button" type="submit" value="Start">
                 </form>
             </div>
