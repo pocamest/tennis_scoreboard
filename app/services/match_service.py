@@ -1,7 +1,7 @@
 import uuid as uuid_pkg
 
 from app.database import Database
-from app.models import Match, Player
+from app.models import Match
 from app.repositories import MatchRepository, PlayerRepository
 from app.store import OngoingMatchStore
 
@@ -20,19 +20,13 @@ class MatchService:
         with self._db.get_session() as session:
             player_repo = PlayerRepository(session)
 
-            p1_from_db = player_repo.find_or_create(player1_name)
-            p2_from_db = player_repo.find_or_create(player2_name)
+            player1 = player_repo.find_or_create(player1_name)
+            player2 = player_repo.find_or_create(player2_name)
 
             session.flush()
 
-            p1_data = {'id': p1_from_db.id, 'name': p1_from_db.name}
-            p2_data = {'id': p2_from_db.id, 'name': p2_from_db.name}
-
-            p1_for_store = Player(**p1_data)
-            p2_for_store = Player(**p2_data)
-
             ongoing_match = Match(
-                uuid=uuid_pkg.uuid4(), player1=p1_for_store, player2=p2_for_store
+                uuid=uuid_pkg.uuid4(), player1=player1, player2=player2
             )
-            self._ongoing_match_store.put(ongoing_match)
-            return ongoing_match
+        self._ongoing_match_store.put(ongoing_match)
+        return ongoing_match
