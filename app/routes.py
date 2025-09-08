@@ -14,3 +14,6 @@ def register_routes(
         path='/new-match',
         handler=match_ctrl.handle_new_match_creation,
     )
+    router.add_route(
+        method='GET', path='/match-score', handler=match_ctrl.show_match_score_page
+    )

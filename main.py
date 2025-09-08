@@ -56,7 +56,8 @@ class App:
             status = '500 Internal Server Error'
             headers = [('Content-type', 'text/html; charset=utf-8')]
             start_response(status, headers)
-            return [b'<h1>500 Internal Server Error</h1>']
+            raise
+            # return [b'<h1>500 Internal Server Error</h1>']
 
     def _unpack_data(self, raw_data: dict[str, list[str]]) -> dict[str, str]:
         data = {}
