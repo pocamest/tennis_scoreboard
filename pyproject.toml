@@ -18,6 +18,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.17.1",
+    "pytest>=8.4.2",
     "ruff>=0.12.8",
     "types-waitress>=3.0.1.20250801",
 ]
@@ -44,3 +45,13 @@ target-version = "py313" # для Python 3.13
 select = ["E", "F", "W", "I", "UP"]
 [tool.ruff.format]
 quote-style = "single"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+]
