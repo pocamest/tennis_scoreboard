@@ -97,13 +97,13 @@ DEUCE_ADVANTAGE_POINT_CASES = [
         Score(points=(PointState.ADVANTAGE, PointState.FORTY), games=(1, 1)),
         PlayerIdentifier.ONE,
         Score(games=(2, 1)),
-        id='(Pts:AD-40) (Gms:1-1) | P1 wins -> (Pts:00-00) (Gms:2-1)',
+        id='(Pts:AD-40) (Gms:1-1) | P1 wins -> (Pts:0-0) (Gms:2-1)',
     ),
     pytest.param(
         Score(points=(PointState.FORTY, PointState.ADVANTAGE), games=(1, 1)),
         PlayerIdentifier.TWO,
         Score(games=(1, 2)),
-        id='(Pts:40-AD) (Gms:1-1) | P2 wins -> (Pts:00-00) (Gms:1-2)',
+        id='(Pts:40-AD) (Gms:1-1) | P2 wins -> (Pts:0-0) (Gms:1-2)',
     ),
 ]
 
@@ -122,13 +122,13 @@ SET_WIN_CASES = [
         Score(points=(PointState.FORTY, PointState.THIRTY), games=(5, 4)),
         PlayerIdentifier.ONE,
         Score(sets=(1, 0)),
-        id='(Pts:40-30) (Gms:5-4) | P1 wins -> (Pts:00-00) (Gms:0-0) (Sts:1-0)',
+        id='(Pts:40-30) (Gms:5-4) | P1 wins -> (Pts:0-0) (Gms:0-0) (Sts:1-0)',
     ),
     pytest.param(
         Score(points=(PointState.THIRTY, PointState.FORTY), games=(4, 5)),
         PlayerIdentifier.TWO,
         Score(sets=(0, 1)),
-        id='(Pts:30-40) (Gms:4-5) | P2 wins -> (Pts:00-00) (Gms:0-0) (Sts:0-1)',
+        id='(Pts:30-40) (Gms:4-5) | P2 wins -> (Pts:0-0) (Gms:0-0) (Sts:0-1)',
     ),
     pytest.param(
         Score(points=(PointState.FORTY, PointState.THIRTY), games=(6, 5), sets=(0, 1)),
@@ -136,7 +136,7 @@ SET_WIN_CASES = [
         Score(sets=(1, 1)),
         id=(
             '(Pts:40-30) (Gms:6-5) (Sts:0-1) '
-            '| P1 wins -> (Pts:00-00) (Gms:0-0) (Sts:1-1)'
+            '| P1 wins -> (Pts:0-0) (Gms:0-0) (Sts:1-1)'
         ),
     ),
     pytest.param(
@@ -145,7 +145,7 @@ SET_WIN_CASES = [
         Score(sets=(1, 1)),
         id=(
             '(Pts:30-40) (Gms:5-6) (Sts:1-0) '
-            '| P2 wins -> (Pts:00-00) (Gms:0-0) (Sts:1-1)'
+            '| P2 wins -> (Pts:0-00) (Gms:0-0) (Sts:1-1)'
         ),
     ),
     pytest.param(
@@ -154,7 +154,7 @@ SET_WIN_CASES = [
         Score(games=(6, 5), sets=(0, 1)),
         id=(
             '(Pts:40-30) (Gms:5-5) (Sts:0-1) '
-            '| P1 wins -> (Pts:00-00) (Gms:6-5) (Sts:0-1)'
+            '| P1 wins -> (Pts:0-0) (Gms:6-5) (Sts:0-1)'
         ),
     ),
 ]
