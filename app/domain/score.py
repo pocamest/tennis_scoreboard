@@ -142,7 +142,9 @@ class Score:
                 tie_break_score=TieBreakScore(),
             )
 
-        return replace(self, points=(self.PointState.LOVE, self.PointState.LOVE), games=new_games)
+        return replace(
+            self, points=(self.PointState.LOVE, self.PointState.LOVE), games=new_games
+        )
 
     def _win_set(self, winner: PlayerIdentifier) -> Self:
         opponent = winner.opponent
@@ -154,7 +156,11 @@ class Score:
             opponent_score_component=opponent_sets,
         )
         return replace(
-            self, points=(self.PointState.LOVE, self.PointState.LOVE), games=(0, 0), sets=new_sets
+            self,
+            points=(self.PointState.LOVE, self.PointState.LOVE),
+            games=(0, 0),
+            sets=new_sets,
+            tie_break_score=None,
         )
 
     def _handle_tie_break_point(self, winner: PlayerIdentifier) -> Self:
@@ -164,7 +170,7 @@ class Score:
             )
         new_tie_break_score = self.tie_break_score.add_point(winner)
         if new_tie_break_score.is_finished():
-            return self._win_set(winner)
+            return self._win_set(winner=winner)
         return replace(self, tie_break_score=new_tie_break_score)
 
 
@@ -172,8 +178,26 @@ class Score:
 class TieBreakScore:
     points: tuple[int, int] = (0, 0)
 
+    _POINTS_TO_WIN_TIE_BREAK: ClassVar[int] = 7
+    _MIN_POINT_DIFFERENCE_FOR_WIN: ClassVar[int] = 2
+
     def add_point(self, winner: PlayerIdentifier) -> Self:
-        pass
+        opponent = winner.opponent
+        opponent_points = self.points[opponent]
+
+        winner_points = self.points[winner] + 1
+
+        new_points = (
+            (winner_points, opponent_points)
+            if winner is PlayerIdentifier.ONE
+            else (opponent_points, winner_points)
+        )
+        return replace(self, points=new_points)
 
     def is_finished(self) -> bool:
-        pass
+        p_max = max(self.points)
+        p_min = min(self.points)
+        return (
+            p_max >= self._POINTS_TO_WIN_TIE_BREAK
+            and p_max - p_min >= self._MIN_POINT_DIFFERENCE_FOR_WIN
+        )
