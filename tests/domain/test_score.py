@@ -1,6 +1,8 @@
 import pytest
 
-from app.domain.score import PlayerIdentifier, PointState, Score
+from app.domain.score import PlayerIdentifier, Score
+
+PointState = Score.PointState
 
 NORMAL_POINT_CASES = [
     pytest.param(

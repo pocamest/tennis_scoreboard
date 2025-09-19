@@ -16,21 +16,20 @@ class PlayerIdentifier(IntEnum):
         return PlayerIdentifier.ONE
 
 
-class PointState(StrEnum):
-    LOVE = '0'
-    FIFTEEN = '15'
-    THIRTY = '30'
-    FORTY = '40'
-    ADVANTAGE = 'AD'
-
-
 # "Компонент Счета" - это атомарная часть счета, т.е. очки, геймы или сеты.
 # Технически, это может быть либо PointState (для очков), либо int (для геймов/сетов).
-TScoreComponent = TypeVar('TScoreComponent', PointState, int)
+TScoreComponent = TypeVar('TScoreComponent', 'Score.PointState', int)
 
 
 @dataclass(frozen=True)
 class Score:
+    class PointState(StrEnum):
+        LOVE = '0'
+        FIFTEEN = '15'
+        THIRTY = '30'
+        FORTY = '40'
+        ADVANTAGE = 'AD'
+
     points: tuple[PointState, PointState] = (PointState.LOVE, PointState.LOVE)
     games: tuple[int, int] = (0, 0)
     sets: tuple[int, int] = (0, 0)
@@ -64,12 +63,12 @@ class Score:
         if self.tie_break_score is not None:
             return self._handle_tie_break_point(winner)
 
-        if PointState.ADVANTAGE in self.points or (
-            self.points == (PointState.FORTY, PointState.FORTY)
+        if self.PointState.ADVANTAGE in self.points or (
+            self.points == (self.PointState.FORTY, self.PointState.FORTY)
         ):
             return self._handle_deuce_advantage_point(winner)
 
-        if PointState.FORTY in self.points:
+        if self.PointState.FORTY in self.points:
             return self._handle_game_point(winner)
 
         return self._handle_normal_point(winner)
@@ -98,15 +97,15 @@ class Score:
         return replace(self, points=new_points)
 
     def _handle_game_point(self, winner: PlayerIdentifier) -> Self:
-        if self.points[winner] is PointState.FORTY:
+        if self.points[winner] is self.PointState.FORTY:
             return self._win_game(winner)
         return self._handle_normal_point(winner)
 
     def _handle_deuce_advantage_point(self, winner: PlayerIdentifier) -> Self:
-        if self.points == (PointState.FORTY, PointState.FORTY):
+        if self.points == (self.PointState.FORTY, self.PointState.FORTY):
             opponent = winner.opponent
             opponent_points = self.points[opponent]
-            winner_points = PointState.ADVANTAGE
+            winner_points = self.PointState.ADVANTAGE
             new_points = self._build_score_component_tuple(
                 winner=winner,
                 winner_score_component=winner_points,
@@ -114,10 +113,10 @@ class Score:
             )
             return replace(self, points=new_points)
 
-        if self.points[winner] is PointState.ADVANTAGE:
+        if self.points[winner] is self.PointState.ADVANTAGE:
             return self._win_game(winner)
 
-        return replace(self, points=(PointState.FORTY, PointState.FORTY))
+        return replace(self, points=(self.PointState.FORTY, self.PointState.FORTY))
 
     def _win_game(self, winner: PlayerIdentifier) -> Self:
         opponent = winner.opponent
@@ -138,12 +137,12 @@ class Score:
         if new_games == self._GAMES_FOR_TIE_BREAK:
             return replace(
                 self,
-                points=(PointState.LOVE, PointState.LOVE),
+                points=(self.PointState.LOVE, self.PointState.LOVE),
                 games=new_games,
                 tie_break_score=TieBreakScore(),
             )
 
-        return replace(self, points=(PointState.LOVE, PointState.LOVE), games=new_games)
+        return replace(self, points=(self.PointState.LOVE, self.PointState.LOVE), games=new_games)
 
     def _win_set(self, winner: PlayerIdentifier) -> Self:
         opponent = winner.opponent
@@ -155,7 +154,7 @@ class Score:
             opponent_score_component=opponent_sets,
         )
         return replace(
-            self, points=(PointState.LOVE, PointState.LOVE), games=(0, 0), sets=new_sets
+            self, points=(self.PointState.LOVE, self.PointState.LOVE), games=(0, 0), sets=new_sets
         )
 
     def _handle_tie_break_point(self, winner: PlayerIdentifier) -> Self:
