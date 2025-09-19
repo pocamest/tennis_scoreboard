@@ -31,14 +31,11 @@ TScoreComponent = TypeVar('TScoreComponent', PointState, int)
 
 @dataclass(frozen=True)
 class Score:
-    """
-    Неизменяемый Объект-значение (Value Object), моделирующий счет матча.
-    Его идентичность определяется совокупностью его атрибутов, а не ID.
-    """
-
     points: tuple[PointState, PointState] = (PointState.LOVE, PointState.LOVE)
     games: tuple[int, int] = (0, 0)
     sets: tuple[int, int] = (0, 0)
+
+    tie_break_score: TieBreakScore | None = None
 
     _NORMAL_POINT_TRANSITION: ClassVar[dict[PointState, PointState]] = {
         PointState.LOVE: PointState.FIFTEEN,
@@ -51,24 +48,31 @@ class Score:
     _MIN_GAME_DIFFERENCE_FOR_SET_WIN: ClassVar[int] = 2
 
     def get_view_score_model(self) -> dict[str, str | int]:
+        points = (
+            self.points if self.tie_break_score is None else self.tie_break_score.points
+        )
         return {
-            'player1_points': self.points[PlayerIdentifier.ONE],
+            'player1_points': points[PlayerIdentifier.ONE],
             'player1_games': self.games[PlayerIdentifier.ONE],
             'player1_sets': self.sets[PlayerIdentifier.ONE],
-            'player2_points': self.points[PlayerIdentifier.TWO],
+            'player2_points': points[PlayerIdentifier.TWO],
             'player2_games': self.games[PlayerIdentifier.TWO],
             'player2_sets': self.sets[PlayerIdentifier.TWO],
         }
 
     def add_point(self, winner: PlayerIdentifier) -> Self:
+        if self.tie_break_score is not None:
+            return self._handle_tie_break_point(winner)
+
         if PointState.ADVANTAGE in self.points or (
             self.points == (PointState.FORTY, PointState.FORTY)
         ):
             return self._handle_deuce_advantage_point(winner)
-        elif PointState.FORTY in self.points:
+
+        if PointState.FORTY in self.points:
             return self._handle_game_point(winner)
-        else:
-            return self._handle_normal_point(winner)
+
+        return self._handle_normal_point(winner)
 
     def _build_score_component_tuple(
         self,
@@ -132,7 +136,12 @@ class Score:
             return self._win_set(winner)
 
         if new_games == self._GAMES_FOR_TIE_BREAK:
-            return self._tie_break(winner)
+            return replace(
+                self,
+                points=(PointState.LOVE, PointState.LOVE),
+                games=new_games,
+                tie_break_score=TieBreakScore(),
+            )
 
         return replace(self, points=(PointState.LOVE, PointState.LOVE), games=new_games)
 
@@ -149,5 +158,23 @@ class Score:
             self, points=(PointState.LOVE, PointState.LOVE), games=(0, 0), sets=new_sets
         )
 
-    def _tie_break(self, winner: PlayerIdentifier) -> Self:
+    def _handle_tie_break_point(self, winner: PlayerIdentifier) -> Self:
+        if self.tie_break_score is None:
+            raise ValueError(
+                'Не удается обработать тай-брейк-пойнт: счет не в режиме тай-брейка.'
+            )
+        new_tie_break_score = self.tie_break_score.add_point(winner)
+        if new_tie_break_score.is_finished():
+            return self._win_set(winner)
+        return replace(self, tie_break_score=new_tie_break_score)
+
+
+@dataclass(frozen=True)
+class TieBreakScore:
+    points: tuple[int, int] = (0, 0)
+
+    def add_point(self, winner: PlayerIdentifier) -> Self:
+        pass
+
+    def is_finished(self) -> bool:
         pass
