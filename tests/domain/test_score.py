@@ -1,6 +1,12 @@
 import pytest
 
-from app.domain.score import PlayerIdentifier, Score, TieBreakScore
+from app.domain.score import (
+    PlayerIdentifier,
+    Score,
+    SetResult,
+    TieBreakResult,
+    TieBreakScore,
+)
 
 PointState = Score.PointState
 
@@ -121,31 +127,14 @@ SET_WIN_CASES = [
     pytest.param(
         Score(points=(PointState.FORTY, PointState.THIRTY), games=(5, 4)),
         PlayerIdentifier.ONE,
-        Score(sets=(1, 0)),
-        id='(Pts:40-30) (Gms:5-4) | P1 wins -> (Pts:0-0) (Gms:0-0) (Sts:1-0)',
+        Score(sets=(1, 0), finished_sets=(SetResult(games=(6, 4)),)),
+        id='(Pts:40-30) (Gms:5-4) | P1 wins -> (Sts:1-0), finished_sets updated',
     ),
     pytest.param(
         Score(points=(PointState.THIRTY, PointState.FORTY), games=(4, 5)),
         PlayerIdentifier.TWO,
-        Score(sets=(0, 1)),
-        id='(Pts:30-40) (Gms:4-5) | P2 wins -> (Pts:0-0) (Gms:0-0) (Sts:0-1)',
-    ),
-    pytest.param(
-        Score(points=(PointState.FORTY, PointState.THIRTY), games=(6, 5), sets=(0, 1)),
-        PlayerIdentifier.ONE,
-        Score(sets=(1, 1)),
-        id=(
-            '(Pts:40-30) (Gms:6-5) (Sts:0-1) | P1 wins -> (Pts:0-0) (Gms:0-0) (Sts:1-1)'
-        ),
-    ),
-    pytest.param(
-        Score(points=(PointState.THIRTY, PointState.FORTY), games=(5, 6), sets=(1, 0)),
-        PlayerIdentifier.TWO,
-        Score(sets=(1, 1)),
-        id=(
-            '(Pts:30-40) (Gms:5-6) (Sts:1-0) '
-            '| P2 wins -> (Pts:0-00) (Gms:0-0) (Sts:1-1)'
-        ),
+        Score(sets=(0, 1), finished_sets=(SetResult(games=(4, 6)),)),
+        id='(Pts:30-40) (Gms:4-5) | P2 wins -> (Sts:0-1), finished_sets updated',
     ),
     pytest.param(
         Score(points=(PointState.FORTY, PointState.THIRTY), games=(5, 5), sets=(0, 1)),
@@ -187,14 +176,30 @@ TIE_BREAK_CASES = [
     pytest.param(
         Score(games=(6, 6), tie_break_score=TieBreakScore(points=(6, 3))),
         PlayerIdentifier.ONE,
-        Score(sets=(1, 0)),
-        id='(Pts:6-3) (Gms:6-6) (Sts: 0:0) | P1 wins -> (Pts:0-0) (Gms:0-0) (Sts: 1:0)',
+        Score(
+            sets=(1, 0),
+            finished_sets=(
+                SetResult(games=(7, 6), tie_break=TieBreakResult(points=(7, 3))),
+            ),
+        ),
+        id=(
+            '(Pts:6-3) (Gms:6-6) (Sts: 0:0) '
+            '| P1 wins -> (Sts: 1:0), finished_sets updated'
+        ),
     ),
     pytest.param(
         Score(games=(6, 6), tie_break_score=TieBreakScore(points=(3, 6))),
         PlayerIdentifier.TWO,
-        Score(sets=(0, 1)),
-        id='(Pts:3-6) (Gms:6-6) (Sts: 0:0) | P2 wins -> (Pts:0-0) (Gms:0-0) (Sts: 0:1)',
+        Score(
+            sets=(0, 1),
+            finished_sets=(
+                SetResult(games=(6, 7), tie_break=TieBreakResult(points=(3, 7))),
+            ),
+        ),
+        id=(
+            '(Pts:3-6) (Gms:6-6) (Sts: 0:0) '
+            '| P2 wins -> (Sts: 0:1), finished_sets updated'
+        ),
     ),
     pytest.param(
         Score(games=(6, 6), tie_break_score=TieBreakScore(points=(5, 5))),
@@ -211,8 +216,16 @@ TIE_BREAK_CASES = [
     pytest.param(
         Score(games=(6, 6), tie_break_score=TieBreakScore(points=(7, 6))),
         PlayerIdentifier.ONE,
-        Score(sets=(1, 0)),
-        id='(Pts:7-6) (Gms:6-6) (Sts: 0:0) | P1 wins -> (Pts:0-0) (Gms:0-0) (Sts: 1:0)',
+        Score(
+            sets=(1, 0),
+            finished_sets=(
+                SetResult(games=(7, 6), tie_break=TieBreakResult(points=(8, 6))),
+            ),
+        ),
+        id=(
+            '(Pts:7-6) (Gms:6-6) (Sts: 0:0) '
+            '| P1 wins -> (Sts: 1:0), , finished_sets updated'
+        ),
     ),
     pytest.param(
         Score(games=(6, 6), tie_break_score=TieBreakScore(points=(7, 7))),
@@ -228,3 +241,57 @@ def test_add_point_for_tie_break(
     initial_score: Score, winner: PlayerIdentifier, expected_score: Score
 ) -> None:
     assert initial_score.add_point(winner) == expected_score
+
+
+def test_initial_score_has_empty_finished_sets() -> None:
+    assert Score().finished_sets == ()
+
+
+FINISHED_SETS_UPDATE_CASES = [
+    pytest.param(
+        Score(
+            sets=(0, 1),
+            finished_sets=(SetResult(games=(5, 7), tie_break=None),),
+            games=(5, 4),
+            points=(PointState.FORTY, PointState.LOVE),
+        ),
+        PlayerIdentifier.ONE,
+        (
+            SetResult(games=(5, 7), tie_break=None),
+            SetResult(games=(6, 4), tie_break=None),
+        ),
+        id=(
+            '(Sts:0-1, finished_sets:1) (Gms:5-4, Pts:40-0) '
+            '| P1 wins set -> finished_sets grows to 2'
+        ),
+    ),
+    pytest.param(
+        Score(
+            sets=(1, 0),
+            finished_sets=(SetResult(games=(6, 4), tie_break=None),),
+            games=(6, 6),
+            tie_break_score=TieBreakScore(points=(6, 7)),
+        ),
+        PlayerIdentifier.TWO,
+        (
+            SetResult(games=(6, 4), tie_break=None),
+            SetResult(games=(6, 7), tie_break=TieBreakResult(points=(6, 8))),
+        ),
+        id=(
+            '(Sts:1-0, finished_sets:1) (Gms:6-6, TB:6-7) '
+            '| P2 wins set -> finished_sets grows to 2'
+        ),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    'initial_score, winner, expected_finished_sets', FINISHED_SETS_UPDATE_CASES
+)
+def test_add_point_updates_finished_sets_correctly(
+    initial_score: Score,
+    winner: PlayerIdentifier,
+    expected_finished_sets: tuple[SetResult, ...],
+) -> None:
+    final_score = initial_score.add_point(winner)
+    assert final_score.finished_sets == expected_finished_sets

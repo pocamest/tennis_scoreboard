@@ -22,6 +22,17 @@ TScoreComponent = TypeVar('TScoreComponent', 'Score.PointState', int)
 
 
 @dataclass(frozen=True)
+class TieBreakResult:
+    points: tuple[int, int]
+
+
+@dataclass(frozen=True)
+class SetResult:
+    games: tuple[int, int]
+    tie_break: TieBreakResult | None = None
+
+
+@dataclass(frozen=True)
 class Score:
     class PointState(StrEnum):
         LOVE = '0'
@@ -35,6 +46,8 @@ class Score:
     sets: tuple[int, int] = (0, 0)
 
     tie_break_score: TieBreakScore | None = None
+
+    finished_sets: tuple[SetResult, ...] = ()
 
     _NORMAL_POINT_TRANSITION: ClassVar[dict[PointState, PointState]] = {
         PointState.LOVE: PointState.FIFTEEN,
@@ -132,7 +145,7 @@ class Score:
             winner_games >= self._GAMES_TO_WIN_SET
             and winner_games - opponent_games >= self._MIN_GAME_DIFFERENCE_FOR_SET_WIN
         ):
-            return self._win_set(winner)
+            return self._win_set(winner=winner, final_games=new_games)
 
         if new_games == self._GAMES_FOR_TIE_BREAK:
             return replace(
@@ -146,7 +159,12 @@ class Score:
             self, points=(self.PointState.LOVE, self.PointState.LOVE), games=new_games
         )
 
-    def _win_set(self, winner: PlayerIdentifier) -> Self:
+    def _win_set(
+        self,
+        winner: PlayerIdentifier,
+        final_games: tuple[int, int],
+        final_tie_break_points: TieBreakResult | None = None,
+    ) -> Self:
         opponent = winner.opponent
         opponent_sets = self.sets[opponent]
         winner_sets = self.sets[winner] + 1
@@ -155,12 +173,30 @@ class Score:
             winner_score_component=winner_sets,
             opponent_score_component=opponent_sets,
         )
+
+        tie_break_result = (
+            final_tie_break_points if final_tie_break_points is not None else None
+        )
+        set_result = SetResult(games=final_games, tie_break=tie_break_result)
+        new_finished_sets = self.finished_sets + (set_result,)
+
         return replace(
             self,
             points=(self.PointState.LOVE, self.PointState.LOVE),
             games=(0, 0),
             sets=new_sets,
             tie_break_score=None,
+            finished_sets=new_finished_sets,
+        )
+
+    def _increment_game(self, winner: PlayerIdentifier) -> tuple[int, int]:
+        opponent = winner.opponent
+        opponent_games = self.games[opponent]
+        winner_games = self.games[winner] + 1
+        return self._build_score_component_tuple(
+            winner=winner,
+            winner_score_component=winner_games,
+            opponent_score_component=opponent_games,
         )
 
     def _handle_tie_break_point(self, winner: PlayerIdentifier) -> Self:
@@ -170,7 +206,13 @@ class Score:
             )
         new_tie_break_score = self.tie_break_score.add_point(winner)
         if new_tie_break_score.is_finished():
-            return self._win_set(winner=winner)
+            final_games = self._increment_game(winner)
+            final_tie_break_points = TieBreakResult(points=new_tie_break_score.points)
+            return self._win_set(
+                winner=winner,
+                final_games=final_games,
+                final_tie_break_points=final_tie_break_points,
+            )
         return replace(self, tie_break_score=new_tie_break_score)
 
 
