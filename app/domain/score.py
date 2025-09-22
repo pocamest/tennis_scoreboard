@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from enum import IntEnum, StrEnum
-from typing import ClassVar, Self, TypeVar
+from typing import ClassVar, NotRequired, Self, TypedDict, TypeVar
 
 
 class PlayerIdentifier(IntEnum):
@@ -19,6 +19,18 @@ class PlayerIdentifier(IntEnum):
 # "Компонент Счета" - это атомарная часть счета, т.е. очки, геймы или сеты.
 # Технически, это может быть либо PointState (для очков), либо int (для геймов/сетов).
 TScoreComponent = TypeVar('TScoreComponent', 'Score.PointState', int)
+
+
+class SetBreakDownDict(TypedDict):
+    player1_games: int
+    player2_games: int
+    tie_break_points: NotRequired[list[int]]
+
+
+class FinalScoreDict(TypedDict):
+    player1_sets_won: int
+    player2_sets_won: int
+    sets_breakdown: list[SetBreakDownDict]
 
 
 @dataclass(frozen=True)
@@ -70,6 +82,23 @@ class Score:
             'player2_points': points[PlayerIdentifier.TWO],
             'player2_games': self.games[PlayerIdentifier.TWO],
             'player2_sets': self.sets[PlayerIdentifier.TWO],
+        }
+
+    def get_final_score_data(self) -> FinalScoreDict:
+        sets_breakdown: list[SetBreakDownDict] = []
+        for s in self.finished_sets:
+            set_data: SetBreakDownDict = {
+                'player1_games': s.games[PlayerIdentifier.ONE],
+                'player2_games': s.games[PlayerIdentifier.TWO],
+            }
+            if s.tie_break is not None:
+                set_data['tie_break_points'] = list(s.tie_break.points)
+            sets_breakdown.append(set_data)
+
+        return {
+            'player1_sets_won': self.sets[PlayerIdentifier.ONE],
+            'player2_sets_won': self.sets[PlayerIdentifier.TWO],
+            'sets_breakdown': sets_breakdown,
         }
 
     def add_point(self, winner: PlayerIdentifier) -> Self:
