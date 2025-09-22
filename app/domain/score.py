@@ -205,7 +205,7 @@ class Score:
                 'Не удается обработать тай-брейк-пойнт: счет не в режиме тай-брейка.'
             )
         new_tie_break_score = self.tie_break_score.add_point(winner)
-        if new_tie_break_score.is_finished():
+        if new_tie_break_score.is_finished:
             final_games = self._increment_game(winner)
             final_tie_break_points = TieBreakResult(points=new_tie_break_score.points)
             return self._win_set(
@@ -236,6 +236,7 @@ class TieBreakScore:
         )
         return replace(self, points=new_points)
 
+    @property
     def is_finished(self) -> bool:
         p_max = max(self.points)
         p_min = min(self.points)
