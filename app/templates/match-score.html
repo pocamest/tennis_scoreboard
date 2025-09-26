@@ -51,7 +51,10 @@
                     <td class="table-text">{{ player1_games }}</td>
                     <td class="table-text">{{ player1_points }}</td>
                     <td class="table-text">
-                        <div class="score-btn">Score</div>
+                        <form method="post" action="/match-score?uuid={{ uuid }}">
+                            <input type="hidden" name="point_winner" value="0">
+                            <button type="submit" class="score-btn">Score</button>
+                        </form>
                     </td>
                 </tr>
                 <tr class="player2">
@@ -60,7 +63,10 @@
                     <td class="table-text">{{ player2_games }}</td>
                     <td class="table-text">{{ player2_points }}</td>
                     <td class="table-text">
-                        <div class="score-btn">Score</div>
+                        <form method="post" action="/match-score?uuid={{ uuid }}">
+                            <input type="hidden" name="point_winner" value="1">
+                            <button type="submit" class="score-btn">Score</button>
+                        </form>
                     </td>
                 </tr>
                 </tbody>

@@ -5,7 +5,7 @@ from jinja2 import Environment
 from pydantic import ValidationError
 
 from app.exceptions import MatchNotFoundError
-from app.schemas import CreateMatchSchema
+from app.schemas import CreateMatchSchema, PointWinnerSchema
 from app.services import MatchService
 
 
@@ -72,6 +72,35 @@ class MatchController:
             match_uuid = uuid_pkg.UUID(uuid)
 
             ongoing_match = self._match_srv.get_ongoing_match(match_uuid)
+        except ValueError:
+            status = '400 Bad Request'
+            headers = [('Content-Type', 'text/html; charset=utf-8')]
+            html_body = '<h1>400 Bad Request: Invalid UUID format</h1>'
+            return status, headers, html_body
+        except MatchNotFoundError:
+            status = '404 Not Found'
+            headers = [('Content-Type', 'text/html; charset=utf-8')]
+            html_body = '<h1>404 Not Found: Match not found</h1>'
+            return status, headers, html_body
+
+        context = ongoing_match.get_view_match_model()
+
+        template = self._jinja.get_template('match-score.html')
+        html_body = template.render(context)
+
+        status = '200 OK'
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        return status, headers, html_body
+
+    def handle_score_update(
+        self, uuid: str, **form_data: Any
+    ) -> tuple[str, list[tuple[str, str]], str]:
+        try:
+            match_uuid = uuid_pkg.UUID(uuid)
+            validated_data = PointWinnerSchema(**form_data)
+            ongoing_match = self._match_srv.record_point(
+                uuid=match_uuid, point_winner=validated_data.point_winner
+            )
         except ValueError:
             status = '400 Bad Request'
             headers = [('Content-Type', 'text/html; charset=utf-8')]

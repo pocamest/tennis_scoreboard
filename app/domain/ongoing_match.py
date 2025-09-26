@@ -13,12 +13,13 @@ class OngoingMatch:
     player1: Player
     player2: Player
 
-    uuid: uuid_pkg.UUID = field(default_factory=uuid_pkg.uuid4, init=False)
-    score: Score = field(default_factory=Score, init=False)
+    uuid: uuid_pkg.UUID = field(default_factory=uuid_pkg.uuid4)
+    score: Score = field(default_factory=Score)
 
     def get_view_match_model(self) -> dict[str, str | int]:
         view_score_model: dict[str, str | int] = self.score.get_view_score_model()
         return {
+            'uuid': str(self.uuid),
             'player1_name': self.player1.name,
             'player2_name': self.player2.name,
             **view_score_model,

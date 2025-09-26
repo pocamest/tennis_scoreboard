@@ -1,7 +1,7 @@
 import uuid as uuid_pkg
 
 from app.database import Database
-from app.domain import OngoingMatch, Player
+from app.domain import OngoingMatch, Player, PlayerIdentifier
 from app.exceptions import MatchNotFoundError
 from app.models import Match
 from app.repositories import MatchRepository, PlayerRepository
@@ -39,3 +39,14 @@ class MatchService:
         if ongoing_match is None:
             raise MatchNotFoundError(f'Ongoing match with UUID {uuid} not found')
         return ongoing_match
+
+    def record_point(
+        self, uuid: uuid_pkg.UUID, point_winner: PlayerIdentifier
+    ) -> OngoingMatch:
+        ongoing_match = self._ongoing_match_store.find_one(uuid)
+        if ongoing_match is None:
+            raise MatchNotFoundError(f'Ongoing match with UUID {uuid} not found')
+
+        new_ongoing_match = ongoing_match.add_point(point_winner)
+        self._ongoing_match_store.put(new_ongoing_match)
+        return new_ongoing_match

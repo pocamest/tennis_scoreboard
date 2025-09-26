@@ -17,3 +17,6 @@ def register_routes(
     router.add_route(
         method='GET', path='/match-score', handler=match_ctrl.show_match_score_page
     )
+    router.add_route(
+        method='POST', path='/match-score', handler=match_ctrl.handle_score_update
+    )

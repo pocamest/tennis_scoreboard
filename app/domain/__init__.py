@@ -11,6 +11,6 @@
 
 from .ongoing_match import OngoingMatch
 from .player import Player
-from .score import Score
+from .score import Score, PlayerIdentifier
 
-__all__ = ['Score', 'OngoingMatch', 'Player']
+__all__ = ['Score', 'OngoingMatch', 'Player', 'PlayerIdentifier']
