@@ -83,7 +83,7 @@ class MatchController:
             html_body = '<h1>404 Not Found: Match not found</h1>'
             return status, headers, html_body
 
-        context = ongoing_match.get_view_match_model()
+        context = ongoing_match.get_view_model()
 
         template = self._jinja.get_template('match-score.html')
         html_body = template.render(context)
@@ -112,7 +112,7 @@ class MatchController:
             html_body = '<h1>404 Not Found: Match not found</h1>'
             return status, headers, html_body
 
-        context = ongoing_match.get_view_match_model()
+        context = ongoing_match.get_view_model()
 
         template = self._jinja.get_template('match-score.html')
         html_body = template.render(context)

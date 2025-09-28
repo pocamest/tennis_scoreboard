@@ -1,8 +1,9 @@
+import json
 import uuid as uuid_pkg
 
 from app.database import Database
 from app.domain import OngoingMatch, Player, PlayerIdentifier
-from app.exceptions import MatchNotFoundError
+from app.exceptions import InconsistentMatchStateError, MatchNotFoundError
 from app.models import Match
 from app.repositories import MatchRepository, PlayerRepository
 from app.store import OngoingMatchStore
@@ -48,5 +49,28 @@ class MatchService:
             raise MatchNotFoundError(f'Ongoing match with UUID {uuid} not found')
 
         new_ongoing_match = ongoing_match.add_point(point_winner)
-        self._ongoing_match_store.put(new_ongoing_match)
+
+        if new_ongoing_match.is_finished:
+            winner = new_ongoing_match.winner
+            if winner is None:
+                raise InconsistentMatchStateError(
+                    'The match is over but the winner has not been determined'
+                )
+            with self._db.get_session() as session:
+                match_ = Match(
+                    uuid=new_ongoing_match.uuid,
+                    player1_id=new_ongoing_match.player1.id,
+                    player2_id=new_ongoing_match.player2.id,
+                    winner_id=winner.id,
+                    score_json=json.dumps(
+                        new_ongoing_match.score.get_final_score_data()
+                    ),
+                )
+
+                match_repo = MatchRepository(session)
+                match_repo.add(match_)
+
+            self._ongoing_match_store.delete(new_ongoing_match.uuid)
+        else:
+            self._ongoing_match_store.put(new_ongoing_match)
         return new_ongoing_match

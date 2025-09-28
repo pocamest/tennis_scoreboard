@@ -35,6 +35,13 @@
         <h1>Current match</h1>
         <div class="current-match-image"></div>
         <section class="score">
+
+            {% if is_finished %}
+                <div class="match-finished-message">
+                    <h2>Match Finished, {{ winner_name }} wins!</h2>
+                </div>
+            {% endif %}
+
             <table class="table">
                 <thead class="result">
                 <tr>
@@ -50,24 +57,30 @@
                     <td class="table-text">{{ player1_sets }}</td>
                     <td class="table-text">{{ player1_games }}</td>
                     <td class="table-text">{{ player1_points }}</td>
+
+                    {% if not is_finished %}
                     <td class="table-text">
                         <form method="post" action="/match-score?uuid={{ uuid }}">
                             <input type="hidden" name="point_winner" value="0">
                             <button type="submit" class="score-btn">Score</button>
                         </form>
                     </td>
+                    {% endif %}
                 </tr>
                 <tr class="player2">
                     <td class="table-text">{{ player2_name }}</td>
                     <td class="table-text">{{ player2_sets }}</td>
                     <td class="table-text">{{ player2_games }}</td>
                     <td class="table-text">{{ player2_points }}</td>
+
+                    {% if not is_finished %}
                     <td class="table-text">
                         <form method="post" action="/match-score?uuid={{ uuid }}">
                             <input type="hidden" name="point_winner" value="1">
                             <button type="submit" class="score-btn">Score</button>
                         </form>
                     </td>
+                    {% endif %}
                 </tr>
                 </tbody>
             </table>

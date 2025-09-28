@@ -1,9 +1,25 @@
 import uuid as uuid_pkg
 from dataclasses import dataclass, field, replace
-from typing import ClassVar, Self
+from typing import ClassVar, Self, TypedDict
 
 from .player import Player
 from .score import PlayerIdentifier, Score
+
+
+class MatchViewDict(TypedDict):
+    uuid: str
+    is_finished: bool
+    winner_name: str | None
+
+    player1_name: str
+    player1_sets: int
+    player1_games: int
+    player1_points: str | int
+
+    player2_name: str
+    player2_sets: int
+    player2_games: int
+    player2_points: str | int
 
 
 @dataclass(frozen=True)
@@ -16,13 +32,25 @@ class OngoingMatch:
     uuid: uuid_pkg.UUID = field(default_factory=uuid_pkg.uuid4)
     score: Score = field(default_factory=Score)
 
-    def get_view_match_model(self) -> dict[str, str | int]:
-        view_score_model: dict[str, str | int] = self.score.get_view_score_model()
+    def get_view_model(self) -> MatchViewDict:
+        view_score = (
+            self.score.as_final_view_score()
+            if self.is_finished
+            else self.score.as_current_view_score()
+        )
+        winner_name = self.winner.name if self.winner is not None else None
         return {
             'uuid': str(self.uuid),
+            'is_finished': self.is_finished,
+            'winner_name': winner_name,
             'player1_name': self.player1.name,
+            'player1_sets': view_score.player1_sets,
+            'player1_games': view_score.player1_games,
+            'player1_points': view_score.player1_points,
             'player2_name': self.player2.name,
-            **view_score_model,
+            'player2_sets': view_score.player2_sets,
+            'player2_games': view_score.player2_games,
+            'player2_points': view_score.player2_points,
         }
 
     def add_point(self, point_winner: PlayerIdentifier) -> Self:

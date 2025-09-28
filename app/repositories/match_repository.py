@@ -13,3 +13,6 @@ class MatchRepository:
             .options(joinedload(Match.player1), joinedload(Match.player2))
             .all()
         )
+
+    def add(self, match_: Match) -> None:
+        self._session.add(match_)

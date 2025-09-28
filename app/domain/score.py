@@ -4,6 +4,8 @@ from dataclasses import dataclass, replace
 from enum import IntEnum, StrEnum
 from typing import ClassVar, NotRequired, Self, TypedDict, TypeVar
 
+from app.exceptions import InconsistentMatchStateError
+
 
 class PlayerIdentifier(IntEnum):
     ONE = 0
@@ -45,6 +47,16 @@ class SetResult:
 
 
 @dataclass(frozen=True)
+class ViewScore:
+    player1_sets: int
+    player2_sets: int
+    player1_games: int
+    player2_games: int
+    player1_points: str | int
+    player2_points: str | int
+
+
+@dataclass(frozen=True)
 class Score:
     class PointState(StrEnum):
         LOVE = '0'
@@ -53,9 +65,9 @@ class Score:
         FORTY = '40'
         ADVANTAGE = 'AD'
 
-    points: tuple[PointState, PointState] = (PointState.LOVE, PointState.LOVE)
-    games: tuple[int, int] = (0, 0)
     sets: tuple[int, int] = (0, 0)
+    games: tuple[int, int] = (0, 0)
+    points: tuple[PointState, PointState] = (PointState.LOVE, PointState.LOVE)
 
     tie_break_score: TieBreakScore | None = None
 
@@ -70,19 +82,6 @@ class Score:
     _GAMES_TO_WIN_SET: ClassVar[int] = 6
     _GAMES_FOR_TIE_BREAK: ClassVar[tuple[int, int]] = (6, 6)
     _MIN_GAME_DIFFERENCE_FOR_SET_WIN: ClassVar[int] = 2
-
-    def get_view_score_model(self) -> dict[str, str | int]:
-        points = (
-            self.points if self.tie_break_score is None else self.tie_break_score.points
-        )
-        return {
-            'player1_points': points[PlayerIdentifier.ONE],
-            'player1_games': self.games[PlayerIdentifier.ONE],
-            'player1_sets': self.sets[PlayerIdentifier.ONE],
-            'player2_points': points[PlayerIdentifier.TWO],
-            'player2_games': self.games[PlayerIdentifier.TWO],
-            'player2_sets': self.sets[PlayerIdentifier.TWO],
-        }
 
     def get_final_score_data(self) -> FinalScoreDict:
         sets_breakdown: list[SetBreakDownDict] = []
@@ -100,6 +99,48 @@ class Score:
             'player2_sets_won': self.sets[PlayerIdentifier.TWO],
             'sets_breakdown': sets_breakdown,
         }
+
+    def as_current_view_score(self) -> ViewScore:
+        sets = self.sets
+        games = self.games
+        points = (
+            self.tie_break_score.points
+            if self.tie_break_score is not None
+            else self.points
+        )
+        return self._build_view_score_from_tuples(sets=sets, games=games, points=points)
+
+    def as_final_view_score(self) -> ViewScore:
+        last_set = self.finished_sets[-1] if self.finished_sets else None
+
+        if last_set is None:
+            raise InconsistentMatchStateError(
+                'The match is completed, but has no completed sets'
+            )
+
+        sets = self.sets
+        games = last_set.games
+        points = (
+            last_set.tie_break.points
+            if last_set.tie_break is not None
+            else (self.PointState.LOVE, self.PointState.LOVE)
+        )
+        return self._build_view_score_from_tuples(sets=sets, games=games, points=points)
+
+    def _build_view_score_from_tuples(
+        self,
+        sets: tuple[int, int],
+        games: tuple[int, int],
+        points: tuple[str, str] | tuple[int, int],
+    ) -> ViewScore:
+        return ViewScore(
+            player1_sets=sets[PlayerIdentifier.ONE],
+            player2_sets=sets[PlayerIdentifier.TWO],
+            player1_games=games[PlayerIdentifier.ONE],
+            player2_games=games[PlayerIdentifier.TWO],
+            player1_points=points[PlayerIdentifier.ONE],
+            player2_points=points[PlayerIdentifier.TWO],
+        )
 
     def add_point(self, winner: PlayerIdentifier) -> Self:
         if self.tie_break_score is not None:
