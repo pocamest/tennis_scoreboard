@@ -14,11 +14,6 @@ class MatchService:
         self._db = db
         self._ongoing_match_store = ongoing_match_store
 
-    def get_all_matches(self) -> list[Match]:
-        with self._db.get_session() as session:
-            match_repo = MatchRepository(session)
-            return match_repo.find_all_matches_with_players()
-
     def create_new_match(self, player1_name: str, player2_name: str) -> OngoingMatch:
         with self._db.get_session() as session:
             player_repo = PlayerRepository(session)

@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Player
@@ -8,7 +9,8 @@ class PlayerRepository:
         self._session = session
 
     def find_one_by_name(self, name: str) -> Player | None:
-        return self._session.query(Player).filter_by(name=name).one_or_none()
+        stmt = select(Player).where(Player.name == name)
+        return self._session.scalars(stmt).one_or_none()
 
     def add(self, player: Player) -> None:
         self._session.add(player)
