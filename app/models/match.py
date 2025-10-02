@@ -26,15 +26,14 @@ class Match(Base):
     player2_id: Mapped[int] = mapped_column(
         'Player2', ForeignKey('Players.ID'), nullable=False
     )
-    winner_id: Mapped[int | None] = mapped_column(
-        'Winner',
-        ForeignKey('Players.ID'),
+    winner_id: Mapped[int] = mapped_column(
+        'Winner', ForeignKey('Players.ID'), nullable=False
     )
-    score_json: Mapped[str | None] = mapped_column('Score')
+    score_json: Mapped[str] = mapped_column('Score', nullable=False)
 
     player1: Mapped[Player] = relationship('Player', foreign_keys=[player1_id])
     player2: Mapped[Player] = relationship('Player', foreign_keys=[player2_id])
-    winner: Mapped[Player | None] = relationship('Player', foreign_keys=[winner_id])
+    winner: Mapped[Player] = relationship('Player', foreign_keys=[winner_id])
 
     def __repr__(self) -> str:
         return (
