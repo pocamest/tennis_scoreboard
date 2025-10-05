@@ -1,12 +1,27 @@
 import json
+import math
 import uuid as uuid_pkg
+from typing import TypedDict
 
 from app.database import Database
 from app.domain import OngoingMatch, Player, PlayerIdentifier
 from app.exceptions import InconsistentMatchStateError, MatchNotFoundError
 from app.models import Match
 from app.repositories import MatchRepository, PlayerRepository
+from app.settings import settings
 from app.store import OngoingMatchStore
+
+
+class FinishedMatchDict(TypedDict):
+    player1_name: str
+    player2_name: str
+    winner_name: str
+
+
+class PaginatedMatchesDict(TypedDict):
+    matches: list[FinishedMatchDict]
+    total_pages: int
+    current_page: int
 
 
 class MatchService:
@@ -69,3 +84,44 @@ class MatchService:
         else:
             self._ongoing_match_store.put(new_ongoing_match)
         return new_ongoing_match
+
+    def get_finished_matches_paginated(
+        self, page: int, player_name: str | None
+    ) -> PaginatedMatchesDict:
+        limit = settings.default_page_size
+        offset = (page - 1) * limit
+
+        with self._db.get_session() as session:
+            player_repo = PlayerRepository(session)
+            match_repo = MatchRepository(session)
+
+            player_orm = None
+
+            if player_name:
+                player_orm = player_repo.find_one_by_name(player_name)
+
+                if player_orm is None:
+                    return {'matches': [], 'total_pages': 0, 'current_page': page}
+
+            matches_orm, total_matches = match_repo.find_many(
+                limit=limit,
+                offset=offset,
+                player=player_orm,
+            )
+
+            matches_dto: list[FinishedMatchDict] = [
+                {
+                    'player1_name': m.player1.name,
+                    'player2_name': m.player2.name,
+                    'winner_name': m.winner.name,
+                }
+                for m in matches_orm
+            ]
+
+            total_pages = math.ceil(total_matches / limit) if total_matches > 0 else 0
+
+            return {
+                'matches': matches_dto,
+                'total_pages': total_pages,
+                'current_page': page,
+            }

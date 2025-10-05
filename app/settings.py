@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     static_url: str = '/static'
 
+    default_page_size: int = 5
+
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
 

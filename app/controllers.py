@@ -120,3 +120,26 @@ class MatchController:
         status = '200 OK'
         headers = [('Content-Type', 'text/html; charset=utf-8')]
         return status, headers, html_body
+
+    def show_matches_page(
+        self, page: str = '1', filter_by_player_name: str | None = None
+    ) -> tuple[str, list[tuple[str, str]], str]:
+        try:
+            page_num = int(page)
+            if page_num < 1:
+                page_num = 1
+        except (ValueError, TypeError):
+            page_num = 1
+
+        paginated_data = self._match_srv.get_finished_matches_paginated(
+            page=page_num, player_name=filter_by_player_name
+        )
+
+        context = {**paginated_data, 'filter_by_player_name': filter_by_player_name}
+
+        template = self._jinja.get_template('matches.html')
+        html_body = template.render(context)
+
+        status = '200 OK'
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        return status, headers, html_body
